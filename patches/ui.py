@@ -123,6 +123,12 @@ class PatchesApp:
                         self.message = f"Hint: placed {drone.id}'s region."
                         break
             self.redraw()
+        elif event.key == "u":
+            if self.board.undo():
+                self.message = "Undid last move."
+            else:
+                self.message = "Nothing to undo."
+            self.redraw()
 
     # ---- drawing -----------------------------------------------------------
 

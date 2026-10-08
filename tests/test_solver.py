@@ -47,3 +47,10 @@ def test_hint_when_solved_does_nothing():
     press(app, "h")
     assert app.board.regions == PROBLEM1_SOLUTION
     assert app.message == "Already solved."
+
+
+def test_undo_reverts_a_hint():
+    app = PatchesApp(load_puzzle("puzzles/problem1.json"))
+    press(app, "h")
+    press(app, "u")
+    assert app.board.regions == {}
