@@ -7,6 +7,10 @@ class Board:
     def __init__(self, puzzle):
         self.puzzle = puzzle
         self.regions = {}  # drone id -> Rect
+        self._history = []  # earlier snapshots of regions
+
+    def _snapshot(self):
+        self._history.append(dict(self.regions))
 
     def place(self, rect):
         """Try to place a region drawn by the player.
@@ -20,6 +24,7 @@ class Board:
         if len(seeds) != 1:
             return None
         drone = seeds[0]
+        self._snapshot()
         self.regions = {did: r for did, r in self.regions.items()
                         if did != drone.id and not r.overlaps(rect)}
         self.regions[drone.id] = rect
@@ -36,11 +41,21 @@ class Board:
         """Remove the region covering (row, col). Returns the removed drone id."""
         drone_id = self.region_at(row, col)
         if drone_id is not None:
+            self._snapshot()
             del self.regions[drone_id]
         return drone_id
 
     def reset(self):
-        self.regions = {}
+        if self.regions:
+            self._snapshot()
+            self.regions = {}
+
+    def undo(self):
+        """Restore the previous regions state. Returns False if nothing to undo."""
+        if not self._history:
+            return False
+        self.regions = self._history.pop()
+        return True
 
     def is_valid(self, drone_id):
         """True if the drone's current region satisfies its shape/size rules."""
