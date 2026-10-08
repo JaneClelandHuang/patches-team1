@@ -14,6 +14,7 @@ from matplotlib.patches import Circle, Rectangle
 
 from .board import Board
 from .rules import Rect
+from .solver import solve
 
 SHAPE_SYMBOLS = {
     "square": "□",
@@ -108,6 +109,19 @@ class PatchesApp:
         if event.key == "r":
             self.board.reset()
             self.message = "Board reset."
+            self.redraw()
+        elif event.key == "h":
+            solution = solve(self.puzzle)
+            if self.board.solved:
+                self.message = "Already solved."
+            elif solution is None:
+                self.message = "No solution found."
+            else:
+                for drone in self.puzzle.drones:
+                    if self.board.regions.get(drone.id) != solution[drone.id]:
+                        self.board.place(solution[drone.id])
+                        self.message = f"Hint: placed {drone.id}'s region."
+                        break
             self.redraw()
         elif event.key == "u":
             if self.board.undo():
